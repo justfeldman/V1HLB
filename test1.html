@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HLB | Market Dashboard</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f8fbff;
+      color: #0b3d91;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #0b3d91;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      letter-spacing: 0.5px;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      width: 280px;
+      padding: 16px;
+      border-top: 4px solid #0b3d91;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+    p {
+      margin: 4px 0;
+    }
+    .price {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .positive { color: green; }
+    .negative { color: red; }
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>HLB | Market Dashboard</header>
+
+  <div class="container" id="dashboard">
+    <!-- Cards auto-populate here -->
+  </div>
+
+  <footer>Powered by Yahoo Finance API (via AllOrigins) | © HLB 2025</footer>
+
+  <script>
+    // 🔹 Add up to 10 tickers here — mix ASX (.AX), NASDAQ, NYSE, etc.
+    const tickers = [
+      "CYC.AX", "AAPL", "MSFT", "TSLA", "GOOG",
+      "BHP.AX", "RIO.AX", "AMZN", "META", "NFLX"
+    ];
+
+    const dashboard = document.getElementById('dashboard');
+
+    // Function to fetch quote data using proxy
+    async function fetchQuote(ticker) {
+      const proxy = "https://api.allorigins.win/get?url=";
+      const target = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+      const url = proxy + encodeURIComponent(target);
+      try {
+        const res = await fetch(url);
+        const raw = await res.json();
+        const data = JSON.parse(raw.contents);
+        return data.quoteResponse.result[0];
+      } catch (err) {
+        console.error("Error fetching", ticker, err);
+        return null;
+      }
+    }
+
+    // Function to create a card
+    function createCard(info) {
+      if (!info) return "";
+      const changeClass = info.regularMarketChange >= 0 ? "positive" : "negative";
+      return `
+        <div class="card">
+          <h2>${info.shortName || info.symbol}</h2>
+          <p class="price">${info.regularMarketPrice ?? "N/A"} ${info.currency || ""}</p>
+          <p class="${changeClass}">${info.regularMarketChange?.toFixed(2) ?? "0"} (${info.regularMarketChangePercent?.toFixed(2) ?? "0"}%)</p>
+          <p><strong>Market Cap:</strong> ${formatNumber(info.marketCap)}</p>
+          <p><strong>P/E Ratio:</strong> ${info.trailingPE ?? "N/A"}</p>
+          <p><strong>Exchange:</strong> ${info.fullExchangeName}</p>
+        </div>
+      `;
+    }
+
+    // Helper: format large numbers into millions/billions
+    function formatNumber(num) {
+      if (!num) return "N/A";
+      if (num >= 1e9) return (num / 1e9
