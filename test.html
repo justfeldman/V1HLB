@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CYC (Cyclopharm) Financial Snapshot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; max-width: 600px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>CYC (Cyclopharm Limited) – ASX: CYC</h1>
+  <div id="quote">
+    <p>Loading current quote…</p>
+  </div>
+
+  <h2>Key Financials</h2>
+  <table id="financials">
+    <thead>
+      <tr><th>Metric</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <!-- rows will populate here -->
+    </tbody>
+  </table>
+
+  <script>
+    const symbol = "CYC.AX";  // ASX listing with .AX
+    const quoteDiv = document.getElementById('quote');
+    const finTableBody = document.querySelector('#financials tbody');
+
+    // Fetch live quote from Yahoo Finance JSON API (unofficial, may change)
+    fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`)
+      .then(response => response.json())
+      .then(data => {
+        const result = data.quoteResponse.result[0];
+        quoteDiv.innerHTML = `
+          <strong>Price:</strong> ${result.regularMarketPrice} AUD&nbsp;
+          (<strong>Change:</strong> ${result.regularMarketChange} AUD)
+        `;
+      })
+      .catch(err => {
+        console.error(err);
+        quoteDiv.innerHTML = `<p>Error fetching quote.</p>`;
+      });
+
+    // Hard-coded key financials — you could fetch more dynamically if you find a valid API
+    const keyFinancials = [
+      { metric: "Revenue (2024)", value: "27.57 m AUD" },
+      { metric: "Net Income (2024)", value: "-13.20 m AUD" },
+      { metric: "Total Assets (2024)", value: "62.13 m AUD" },
+      { metric: "Total Debt (2024)", value: "8.29 m AUD" },
+    ];
+
+    keyFinancials.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${item.metric}</td><td>${item.value}</td>`;
+      finTableBody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
