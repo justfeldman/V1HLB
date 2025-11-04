@@ -1,0 +1,25 @@
+import sqlite3
+import yfinance as yf
+
+conn = sqlite3.connect('SQL/companies.db')
+cur = conn.cursor()
+
+# Load schema
+with open('SQL/schema.sql') as f:
+    cur.executescript(f.read())
+
+# Add your tickers here
+tickers = ["AAPL", "MSFT", "GOOG", "CYC.AX", "BHP.AX", "TSLA"]
+
+for t in tickers:
+    data = yf.Ticker(t).info
+    cur.execute('''INSERT OR REPLACE INTO companies
+                   (name, ticker, sector, industry, country, market_cap, pe_ratio)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                (data.get('shortName'), t, data.get('sector'), data.get('industry'),
+                 data.get('country'), data.get('marketCap'), data.get('trailingPE')))
+    print(f"✅ Added {t}")
+
+conn.commit()
+conn.close()
+print("Database updated successfully!")
